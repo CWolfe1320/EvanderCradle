@@ -8,6 +8,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QTextStream>
+#include "serializer.h"
 
 
 class APIClient : public QObject
@@ -15,15 +16,16 @@ class APIClient : public QObject
     Q_OBJECT
 
 public:
-    APIClient(QString authToken, QString model, QString endpoint);
-    void sendRequest(QString messageContent);
-
+    APIClient(QString authToken, QString model, QString endpoint, Serializer *serializer);
+    void sendRequest(QJsonArray messageContent);
+    QString getLastResponse();
 
 private:
     QNetworkAccessManager *manager;
     QString authToken;
     QString model;
     QString endpoint;
+    Serializer* serializer;
 
 private slots:
     void onResponse(QNetworkReply *reply);

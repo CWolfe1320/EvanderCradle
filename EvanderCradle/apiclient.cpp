@@ -1,24 +1,16 @@
 #include "apiclient.h"
 
-APIClient::APIClient(QString authToken, QString model, QString endpoint) : authToken(authToken), model(model), endpoint(endpoint){
+APIClient::APIClient(QString authToken, QString model, QString endpoint, Serializer *serializer) : authToken(authToken), model(model), endpoint(endpoint), serializer(serializer){
     this->manager = new QNetworkAccessManager(this);
     QObject::connect(this->manager, &QNetworkAccessManager::finished, this, &APIClient::onResponse);
 }
 
-void APIClient::sendRequest(QString messageContent){
+void APIClient::sendRequest(QJsonArray messagesArray){
     QUrl url(this->endpoint);
     QNetworkRequest request(url);
 
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Authorization", "Bearer " + this->authToken.toUtf8());
-
-    QJsonObject messageObject;
-
-    messageObject["role"] = "user";
-    messageObject["content"] = messageContent;
-
-    QJsonArray messagesArray;
-    messagesArray.append(messageObject);
 
     QJsonObject rootObject;
     rootObject["messages"] = messagesArray;
@@ -35,20 +27,16 @@ void APIClient::onResponse(QNetworkReply *reply){
         QTextStream(stdout) << "Reply from server, error: " << reply->errorString() << Qt::endl;
     }
     else{
-        //QTextStream(stdout) << "Reply from server: " << reply->readAll() << Qt::endl;
 
         QByteArray responseData = reply->readAll();
 
         QJsonParseError jsonError;
         QJsonDocument jsonDoc = QJsonDocument::fromJson(responseData, &jsonError);
 
-
-
         if(jsonError.error == QJsonParseError::NoError){
             if(jsonDoc.isObject() && !jsonDoc.isEmpty()){
                 QJsonObject rootObj = jsonDoc.object();
 
-                //access choices array
                 if(rootObj.contains("choices") && rootObj["choices"].isArray()){
                     QJsonArray choicesArray = rootObj["choices"].toArray();
 
@@ -62,6 +50,8 @@ void APIClient::onResponse(QNetworkReply *reply){
                                 QString content = messageObj["content"].toString();
 
                                 QTextStream(stdout) << content << Qt::endl;
+
+                                this->serializer->write(content,"assistant");
                             }
                         }
                     }
@@ -74,4 +64,3 @@ void APIClient::onResponse(QNetworkReply *reply){
     }
     reply->deleteLater();
 }
-
