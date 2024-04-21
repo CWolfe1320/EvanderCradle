@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "apiclient.h"
+#include "serializer.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -8,11 +9,13 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    APIClient apiClient("authToken here", "mixtral-8x7b-32768", "https://api.groq.com/openai/v1/chat/completions");
+    Serializer mixtral("mixtral.txt");
 
-    QString messageContent = "Hey mixtral! How are you today?";
+    APIClient apiClient("{authToken}", "mixtral-8x7b-32768", "https://api.groq.com/openai/v1/chat/completions", &mixtral);
 
-    apiClient.sendRequest(messageContent);
+    mixtral.write("Ooh! Aiden is a great name. As a test could you tell me what I just asked you to call me?", "user");
+
+    apiClient.sendRequest(mixtral.read());
 
     return a.exec();
 }
