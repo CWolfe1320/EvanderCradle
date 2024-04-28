@@ -24,7 +24,12 @@ void APIClient::sendRequest(QJsonArray messagesArray){
 
 void APIClient::onResponse(QNetworkReply *reply){
     if(reply->error()){
-        QTextStream(stdout) << "Reply from server, error: " << reply->errorString() << Qt::endl;
+        QTextStream(stdout) << "Reply from server, error: " << reply->errorString() << " " << reply->readAll() << " " << reply->error() << " " << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toString() << Qt::endl;
+
+        QList<QByteArray> headerList = reply->rawHeaderList();
+        for(int i = 0; i < reply->rawHeaderList().count(); ++i){
+            QTextStream(stdout) << reply->rawHeaderList()[i] << ": " << reply->rawHeader(reply->rawHeaderList()[i]) << Qt::endl;
+        }
     }
     else{
 
@@ -49,7 +54,12 @@ void APIClient::onResponse(QNetworkReply *reply){
                             if(messageObj.contains("content") && messageObj["content"].isString()){
                                 QString content = messageObj["content"].toString();
 
-                                QTextStream(stdout) << content << Qt::endl;
+                                QList<QByteArray> headerList = reply->rawHeaderList();
+                                for(int i = 0; i < reply->rawHeaderList().count(); ++i){
+                                    QTextStream(stdout) << reply->rawHeaderList()[i] << ": " << reply->rawHeader(reply->rawHeaderList()[i]) << Qt::endl;
+                                }
+
+                                responseReceived(content);
 
                                 this->serializer->write(content,"assistant");
                             }
