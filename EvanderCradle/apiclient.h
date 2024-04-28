@@ -20,6 +20,9 @@ public:
     void sendRequest(QJsonArray messageContent);
     QString getLastResponse();
 
+signals:
+    void responseReceived(QString message);
+
 private:
     QNetworkAccessManager *manager;
     QString authToken;

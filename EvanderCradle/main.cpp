@@ -6,16 +6,17 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
+
+    Serializer llama3_70("llama3_70.txt");
+
+    APIClient apiClient("{authToken}", "llama3-70b-8192", "https://api.groq.com/openai/v1/chat/completions", &llama3_70);
+
+    MainWindow w(&apiClient, nullptr);
+
+    w.setAPIClient(&apiClient);
+    w.setSerializer(&llama3_70);
+
     w.show();
-
-    Serializer mixtral("mixtral.txt");
-
-    APIClient apiClient("{authToken}", "mixtral-8x7b-32768", "https://api.groq.com/openai/v1/chat/completions", &mixtral);
-
-    mixtral.write("Ooh! Aiden is a great name. As a test could you tell me what I just asked you to call me?", "user");
-
-    apiClient.sendRequest(mixtral.read());
 
     return a.exec();
 }

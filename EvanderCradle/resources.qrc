@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/EvanderCradle.png</file>
+    </qresource>
+</RCC>
